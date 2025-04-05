@@ -23,17 +23,40 @@ def call_ollama(prompt):
     )
     return response.json()["response"]
 
+
+# Streamlit Page Config
+st.set_page_config(page_title="Smart Resume Analyzer", page_icon="🧠", layout="wide")
+st.markdown(
+    """
+    <style>
+    .main{
+        background-color: #f9f9f9;
+    }
+    .stTextArea, .stFileUploader, .stButton {
+        margin-nottom: 20px;
+    }
+    </style>
+    """, 
+    unsafe_allow_html=True
+)
+
 # Stramlit UI
 
 st.title("🧠 Smart Resume Analyzer")
+st.subheader("Analyze your resume, get feedback, and generate cover letters with LLaMa")
+st.markdown("---")
 
-st.markdown("### 📄 Upload Your Resume (PDF)")
-uploaded_resume = st.file_uploader("Upload a PDF file", type="pdf")
+# Upload Resume PDF
+col1, col2 = st.columns([1, 2])
+with col1:
+    uploaded_resume = st.file_uploader("📄 Upload Your Resume (PDF)", type="pdf")
+with col2:
+    job_description = st.text_area("💼 Paste Job Description")
 
-st.markdown("### 💼 Paste Job Description")
-job_description = st.text_area("Job Description")
+generate_full_cover = st.checkbox("📝 Also generate a full Cover Letter", value=True)
 
-if uploaded_resume and job_description and st.button("Analyze"):
+
+if uploaded_resume and job_description and st.button("🚀 Analyze Resume"):
     resume_text = extract_text_from_pdf(uploaded_resume)
     
     with st.spinner("Analyzing with LLaMa..."):
@@ -68,9 +91,31 @@ if uploaded_resume and job_description and st.button("Analyze"):
         """
         cover_response = call_ollama(cover_prompt)
         
+        # Prompt 3: Full cover Letter
+        full_cover_prompt = f"""
+        Using the resume and job description, write a professional and personalised full cover letter.
+        Address the hiring manager, highlight the most relevant experience, and keep it clear and impactful.
+        
+        RESUME:
+        {resume_text}
+        
+        JOB DESCRIPTION:
+        {job_description}
+        """
+        
+        full_cover_letter = call_ollama(full_cover_prompt)
+        
         # Display Results
         st.markdown("### 📊 Resume Analysis")
         st.write(analysis_response)
         
         st.markdown("### 📝 Cover Letter Bullet Points")
-        st.write(cover_response)
+        # Split by line and display only lines that look like bullet points
+        for line in cover_response.splitlines():
+            if line.strip().startswith("-") or line.strip().startswith("•"):
+                st.markdown(f"- {line.strip()[1:].strip()}")
+
+        
+        if full_cover_letter:
+            st.markdown("## ✉️ Full Cover Letter")
+            st.code(full_cover_letter, language="markdown")
