@@ -19,9 +19,7 @@
 
 ## 🖼️ Demo
 
-📌 _Coming soon: Add a GIF or screenshot here_
-
----
+## 📌
 
 ## 🛠️ Tech Stack
 
@@ -53,9 +51,8 @@ Or manually:
 pip install streamlit requests PyMuPDF
 ```
 
-### 3.
+### 3. Install Ollama & Pull LLaMA Model
 
-Install Ollama & Pull LLaMA Model
 Download Ollama from https://ollama.com
 Then run:
 
